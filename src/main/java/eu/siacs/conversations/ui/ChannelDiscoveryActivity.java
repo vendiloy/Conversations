@@ -221,16 +221,17 @@ public class ChannelDiscoveryActivity extends XmppActivity implements MenuItem.O
         final boolean syncAutojoin = getBooleanPreference("autojoin", R.bool.autojoin);
         Account account = xmppConnectionService.findAccountByJid(Jid.of(accountJid));
         final Conversation conversation = xmppConnectionService.findOrCreateConversation(account, result.getRoom(), true, true, true);
-        if (conversation.getBookmark() != null) {
-            if (!conversation.getBookmark().autojoin() && syncAutojoin) {
+        Bookmark bookmark = conversation.getBookmark();
+        if (bookmark != null) {
+            if (!bookmark.autojoin() && syncAutojoin) {
                 conversation.getBookmark().setAutojoin(true);
-                xmppConnectionService.pushBookmarks(account);
+                xmppConnectionService.createBookmark(account, bookmark);
             }
         } else {
-            final Bookmark bookmark = new Bookmark(account, conversation.getJid().asBareJid());
+            bookmark = new Bookmark(account, conversation.getJid().asBareJid());
             bookmark.setAutojoin(syncAutojoin);
             account.getBookmarks().add(bookmark);
-            xmppConnectionService.pushBookmarks(account);
+            xmppConnectionService.createBookmark(account, bookmark);
         }
         switchToConversation(conversation);
     }
